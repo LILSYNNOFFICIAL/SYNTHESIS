@@ -1,4 +1,4 @@
-import { useEffect,useMemo,useState } from "react";
+import React, { useEffect,useMemo,useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { Activity,ArrowDownToLine,ArrowRight,Bot,Check,ChevronDown,Clock3,Command,FileSearch,Globe2,LayoutDashboard,LoaderCircle,LockKeyhole,Menu,Network,Play,Search,Settings2,ShieldCheck,Sparkles,TerminalSquare,Wrench,X,Zap } from "lucide-react";
 type Tool={id:string;name:string;category:string;description:string;executable:string;installed:boolean;risk:string};
