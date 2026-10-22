@@ -3,6 +3,6 @@
  "productName":"SYNTHESIS","version":"0.1.0","identifier":"com.neurosyn.synthesis",
  "build":{"beforeDevCommand":"npm run dev","devUrl":"http://localhost:1420","beforeBuildCommand":"npm run build","frontendDist":"../dist"},
  "app":{"windows":[{"title":"SYNTHESIS · Security Workspace","width":1440,"height":920,"minWidth":900,"minHeight":650,"center":true,"resizable":true}],
- "security":{"csp":"default-src 'self'; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src ipc: http://ipc.localhost http://127.0.0.1:11434"}},
+ "security":{"csp":"default-src 'self'; img-src 'self' asset: http://asset.localhost data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; connect-src ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420 http://127.0.0.1:11434"}},
  "bundle":{"active":true,"targets":["deb","appimage"],"category":"Utility","shortDescription":"AI-assisted graphical security workspace","longDescription":"A professional desktop workspace for planning and running supported Kali Linux security tools."}
 }
