@@ -256,7 +256,7 @@ async fn pull_ollama_model(model: String) -> Result<String, String> {
         .timeout(Duration::from_secs(45 * 60))
         .build()
         .map_err(|error| format!("Could not initialize Ollama client: {error}"))?;
-    let body = serde_json::json!({ "model": model, "stream": false });
+    let body = serde_json::json!({ "model": model.clone(), "stream": false });
     let response = timeout(
         Duration::from_secs(45 * 60),
         client.post("http://127.0.0.1:11434/api/pull").json(&body).send(),
