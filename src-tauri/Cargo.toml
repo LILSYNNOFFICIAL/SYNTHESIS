@@ -1,0 +1,19 @@
+[package]
+name = "synthesis"
+version = "0.1.0"
+description = "AI-assisted graphical security workspace for Kali Linux"
+authors = ["SYNTHESIS contributors"]
+edition = "2021"
+[lib]
+name = "synthesis_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "time"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
