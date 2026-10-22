@@ -103,7 +103,7 @@ fn bound_output(mut text: String) -> String {
             end -= 1;
         }
         text.truncate(end);
-        text.push_str("\\n[Output truncated at 100 KB]");
+        text.push_str("\n[Output truncated at 100 KB]");
     }
     text
 }
