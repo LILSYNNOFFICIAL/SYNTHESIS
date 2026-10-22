@@ -5,14 +5,14 @@
 - **React + TypeScript:** mission entry, plan review, tool catalog, execution confirmation, result inspection, local activity, settings.
 - **Tauri 2:** desktop shell and a narrow invoke-command bridge.
 - **Rust:** adapter registry, target validation, command argument construction, timeout management, output bounding, and local AI HTTP calls.
-- **Ollama:** optional local model endpoint at `127.0.0.1:11434`; model discovery uses `/api/tags`, mission planning uses `/api/chat`.
+- **Ollama:** optional local model endpoint at `127.0.0.1:11434`; model discovery uses `/api/tags`, mission planning uses `/api/chat`, and GUI model downloads use `/api/pull` with a fixed model allowlist.
 - **Local webview storage:** recent jobs, latest output, and model preference. This is convenience persistence, not encrypted storage.
 
 ## Execution flow
 
 1. The user describes an objective.
 2. Ollama produces a text-only plan, or the deterministic fallback is used.
-3. The user selects a registered adapter and enters a hostname, IP, or supported CIDR.
+3. SYNTHESIS extracts an explicit hostname, IP, or CIDR from the mission when possible, then independently validates it. The user can correct the target and selects a registered adapter recommended by the planner.
 4. Rust validates authorization acknowledgement and target syntax.
 5. Rust maps the adapter ID to a fixed executable and a fixed argument template.
 6. The child process is started without a shell, dropped on timeout, and output is capped before it is returned to the UI.
