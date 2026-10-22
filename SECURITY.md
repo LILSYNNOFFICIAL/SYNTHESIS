@@ -1,14 +1,20 @@
 # Security Policy
 
-SYNTHESIS is an early development preview and is not yet a hardened production security product.
+SYNTHESIS is an active-development security workspace, not a hardened production security product.
 
-Please do not publish exploit details in public issues. Use GitHub private vulnerability reporting if enabled, or contact maintainers privately.
+## Reporting
 
-Current safeguards:
-- Fixed allowlist of registered tool adapters.
-- Arguments passed directly without shell interpretation.
-- Target validation and authorization acknowledgement.
-- AI plans are advisory and cannot directly invoke tools.
+Please do not publish exploit details in public issues. Use GitHub's private vulnerability reporting if enabled, or contact the maintainers privately.
+
+## Current safeguards
+
+- Fixed allowlist of registered adapter IDs.
+- Direct process invocation without shell interpolation.
+- Host/IP/CIDR validation and bounded network scan scope.
+- Explicit authorization acknowledgement before execution.
+- AI output is advisory and cannot directly invoke tools.
+- Child-process timeout and bounded output capture.
+- Local-only Ollama endpoint; no cloud AI provider configured.
 - No root privileges requested by the application.
 
-These controls reduce risk but do not guarantee safety. Only test systems you own or are explicitly authorized to assess.
+These controls reduce risk but do not guarantee safety. Only assess assets you own or are explicitly authorized to test. Review every target and the expected impact before execution.
