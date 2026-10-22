@@ -59,8 +59,10 @@ npm run tauri dev
 Build Linux packages:
 
 ```bash
-npm run tauri build
+bash scripts/build-kali.sh
 ```
+
+The build helper runs the frontend check, Rust tests, and Tauri package build in one command after system prerequisites are installed. To run each step manually, use the commands above.
 
 Tauri writes package artifacts beneath `src-tauri/target/release/bundle/` (the exact output depends on the selected bundle target and installed build dependencies).
 
