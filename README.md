@@ -68,10 +68,10 @@ Tauri writes package artifacts beneath `src-tauri/target/release/bundle/` (the e
 
 ## Local AI without a powerful GPU
 
-1. Install Ollama from [ollama.com](https://ollama.com/).
-2. Pull a small instruction model suitable for your RAM, for example `qwen2.5:3b` or another small quantized model supported by your Ollama version.
-3. Start Ollama and open SYNTHESIS Settings.
-4. In Settings, select an installed model or download one of the supported small models directly through the GUI, then test the connection.
+1. Install Ollama from [ollama.com](https://ollama.com/) and ensure its local service is running.
+2. Open SYNTHESIS Settings and choose a small model such as `qwen2.5:0.5b`, `qwen2.5:1.5b`, or `llama3.2:1b`.
+3. Click **Download selected model**. The app downloads only from its fixed model allowlist and refreshes the installed model list.
+4. Test the connection. Small models can run on CPU, but generation may be slower and still needs enough RAM.
 
 SYNTHESIS does not send mission text to a cloud AI provider. If Ollama is missing or unavailable, the app falls back to a deterministic checklist. The fallback is not generative AI.
 
