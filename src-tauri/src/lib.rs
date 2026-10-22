@@ -247,6 +247,30 @@ async fn ollama_models() -> Vec<String> {
 }
 
 #[tauri::command]
+async fn pull_ollama_model(model: String) -> Result<String, String> {
+    const ALLOWED_MODELS: [&str; 5] = ["qwen2.5:0.5b", "qwen2.5:1.5b", "qwen2.5:3b", "llama3.2:1b", "llama3.2:3b"];
+    if !ALLOWED_MODELS.contains(&model.as_str()) {
+        return Err("Choose one of the supported small local models in Settings.".into());
+    }
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(45 * 60))
+        .build()
+        .map_err(|error| format!("Could not initialize Ollama client: {error}"))?;
+    let body = serde_json::json!({ "model": model, "stream": false });
+    let response = timeout(
+        Duration::from_secs(45 * 60),
+        client.post("http://127.0.0.1:11434/api/pull").json(&body).send(),
+    ).await.map_err(|_| "Model download timed out. Ollama may still be completing the download.".to_string())?
+        .map_err(|error| format!("Could not reach local Ollama. Confirm it is running: {error}"))?;
+    if !response.status().is_success() {
+        let status = response.status();
+        let body = response.text().await.unwrap_or_default();
+        return Err(format!("Ollama model download failed ({status}): {}", body.chars().take(500).collect::<String>()));
+    }
+    Ok(format!("Ollama finished downloading {model}. You can now use it for local mission planning."))
+}
+
+#[tauri::command]
 async fn plan_mission(mission: String, model: Option<String>) -> Result<MissionPlan, String> {
     let prompt = mission.trim();
     if prompt.is_empty() || prompt.len() > 4000 {
@@ -380,7 +404,7 @@ async fn run_tool(tool_id: String, target: String, authorized: bool) -> Result<J
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![list_tools, check_ollama, ollama_models, plan_mission, run_tool])
+        .invoke_handler(tauri::generate_handler![list_tools, check_ollama, ollama_models, pull_ollama_model, plan_mission, run_tool])
         .run(tauri::generate_context!())
         .expect("error while running SYNTHESIS");
 }
