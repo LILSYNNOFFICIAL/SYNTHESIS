@@ -115,6 +115,9 @@ fn validate_target(target: &str) -> Result<(), String> {
     if value.parse::<IpAddr>().is_ok() {
         return Ok(());
     }
+    if value.contains('.') && value.chars().all(|c| c.is_ascii_digit() || c == '.') {
+        return Err("Enter a valid IPv4 address.".into());
+    }
     if value.len() > 253 || value.ends_with('.') || value.starts_with('.') {
         return Err("Enter a valid hostname or IP address.".into());
     }
@@ -127,6 +130,18 @@ fn validate_target(target: &str) -> Result<(), String> {
     });
     if !valid_hostname {
         return Err("Enter a valid hostname or IP address.".into());
+    }
+    Ok(())
+}
+
+fn validate_nmap_scope(target: &str) -> Result<(), String> {
+    if let Some((address, prefix)) = target.split_once('/') {
+        let ip: IpAddr = address.parse().map_err(|_| "CIDR notation requires an IP address.")?;
+        let prefix: u8 = prefix.parse().map_err(|_| "CIDR prefix must be numeric.")?;
+        let minimum_prefix = if ip.is_ipv4() { 24 } else { 120 };
+        if prefix < minimum_prefix {
+            return Err(format!("To keep discovery bounded, SYNTHESIS limits network scans to /{minimum_prefix} or narrower."));
+        }
     }
     Ok(())
 }
@@ -250,14 +265,8 @@ async fn run_tool(tool_id: String, target: String, authorized: bool) -> Result<J
         return Err("Execution blocked: confirm that you own the target or have explicit authorization.".into());
     }
     validate_target(&target)?;
-    if tool_id == "nmap" && target.contains('/') {
-        let (address, prefix) = target.split_once('/').ok_or("Invalid CIDR target.")?;
-        let ip: IpAddr = address.parse().map_err(|_| "CIDR notation requires an IP address.")?;
-        let prefix: u8 = prefix.parse().map_err(|_| "CIDR prefix must be numeric.")?;
-        let minimum_prefix = if ip.is_ipv4() { 24 } else { 120 };
-        if prefix < minimum_prefix {
-            return Err(format!("To keep discovery bounded, SYNTHESIS limits network scans to /{minimum_prefix} or narrower."));
-        }
+    if tool_id == "nmap" {
+        validate_nmap_scope(target.trim())?;
     }
     let (program, args) = build_command(&tool_id, target.trim())?;
     if !command_exists(program) {
@@ -326,7 +335,7 @@ mod tests {
 
     #[test]
     fn rejects_invalid_hostnames_and_cidrs() {
-        for target in ["-example.org", "example..org", "bad host", "192.168.1.0/33", "example.org/24"] {
+        for target in ["-example.org", "example..org", "bad host", "192.168.1.0/33", "999.999.999.999", "example.org/24"] {
             assert!(validate_target(target).is_err(), "expected {target} to be rejected");
         }
     }
@@ -340,6 +349,23 @@ mod tests {
         ids.dedup();
         assert_eq!(ids.len(), tools.len());
         assert!(tools.iter().all(|tool| !tool.executable.is_empty()));
+    }
+
+    #[test]
+    fn nmap_scope_is_bounded() {
+        assert!(validate_nmap_scope("192.168.1.0/24").is_ok());
+        assert!(validate_nmap_scope("192.168.0.0/16").is_err());
+        assert!(validate_nmap_scope("2001:db8::/120").is_ok());
+        assert!(validate_nmap_scope("2001:db8::/64").is_err());
+        assert!(validate_nmap_scope("example.org").is_ok());
+    }
+
+    #[test]
+    fn web_adapters_construct_fixed_https_urls() {
+        let (program, args) = build_command("http_headers", "example.org").unwrap();
+        assert_eq!(program, "curl");
+        assert!(args.iter().any(|arg| arg == "https://example.org"));
+        assert!(!args.iter().any(|arg| arg.contains("&&") || arg.contains(';')));
     }
 
     #[test]
