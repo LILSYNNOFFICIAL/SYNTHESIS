@@ -115,7 +115,7 @@ fn extract_target(mission: &str) -> Option<String> {
         let candidate = token.strip_prefix("https://")
             .or_else(|| token.strip_prefix("http://"))
             .unwrap_or(token);
-        let mut host = candidate.split('/').next().unwrap_or("");
+        let mut host = if validate_target(candidate).is_ok() { candidate } else { candidate.split('/').next().unwrap_or("") };
         if let Some((prefix, port)) = host.rsplit_once(':') {
             if !prefix.contains(':') && !port.is_empty() && port.chars().all(|c| c.is_ascii_digit()) {
                 host = prefix;
