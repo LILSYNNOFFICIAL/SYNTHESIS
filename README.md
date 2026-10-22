@@ -71,7 +71,7 @@ Tauri writes package artifacts beneath `src-tauri/target/release/bundle/` (the e
 1. Install Ollama from [ollama.com](https://ollama.com/).
 2. Pull a small instruction model suitable for your RAM, for example `qwen2.5:3b` or another small quantized model supported by your Ollama version.
 3. Start Ollama and open SYNTHESIS Settings.
-4. Select a model detected on the local instance and test the connection.
+4. In Settings, select an installed model or download one of the supported small models directly through the GUI, then test the connection.
 
 SYNTHESIS does not send mission text to a cloud AI provider. If Ollama is missing or unavailable, the app falls back to a deterministic checklist. The fallback is not generative AI.
 
