@@ -96,6 +96,18 @@ fn command_exists(program: &str) -> bool {
         .any(|path| path.join(program).is_file())
 }
 
+fn bound_output(mut text: String) -> String {
+    if text.len() > MAX_OUTPUT_BYTES {
+        let mut end = MAX_OUTPUT_BYTES.saturating_sub(40);
+        while !text.is_char_boundary(end) {
+            end -= 1;
+        }
+        text.truncate(end);
+        text.push_str("\\n[Output truncated at 100 KB]");
+    }
+    text
+}
+
 fn validate_target(target: &str) -> Result<(), String> {
     let value = target.trim();
     if value.is_empty() || value.len() > 253 {
@@ -278,12 +290,12 @@ async fn plan_mission(mission: String, model: Option<String>) -> Result<MissionP
         Some("traceroute")
     } else if lower.contains("ping") || lower.contains("reachability") || lower.contains("reachable") {
         Some("ping")
+    } else if lower.contains("host lookup") || lower.contains("resolve host") {
+        Some("host")
     } else if lower.contains("dns") || lower.contains("resolve") || lower.contains("domain record") {
         Some("dig")
     } else if lower.contains("scan") || lower.contains("open port") || lower.contains("service discovery") || lower.contains("network discovery") {
         Some("nmap")
-    } else if lower.contains("host lookup") || lower.contains("resolve host") {
-        Some("host")
     } else {
         None
     }.map(str::to_string);
@@ -329,8 +341,7 @@ async fn run_tool(tool_id: String, target: String, authorized: bool) -> Result<J
             let mut text = format!("Adapter: {tool_id}\nProgram: {program}\nArguments: {}", args.iter().map(|arg| if arg.contains(' ') { format!("\"{arg}\"") } else { arg.clone() }).collect::<Vec<_>>().join(" "));
             if !stdout.trim().is_empty() { text.push_str("\n\n"); text.push_str(&stdout); }
             if !stderr.trim().is_empty() { text.push_str("\n\nSTDERR:\n"); text.push_str(&stderr); }
-            text.truncate(MAX_OUTPUT_BYTES);
-            (text, result.status.success())
+            (bound_output(text), result.status.success())
         }
     };
     Ok(Job {
@@ -400,6 +411,14 @@ mod tests {
         for id in ["nmap", "ping", "traceroute", "dig", "dns_mx", "dns_txt", "dns_ns", "host", "whois", "http_headers", "http_status"] {
             assert!(available.iter().any(|known| known == id));
         }
+    }
+
+    #[test]
+    fn output_truncation_respects_utf8_boundaries() {
+        let text = "é".repeat(MAX_OUTPUT_BYTES);
+        let bounded = bound_output(text);
+        assert!(bounded.len() <= MAX_OUTPUT_BYTES);
+        assert!(bounded.contains("Output truncated"));
     }
 
     #[test]
