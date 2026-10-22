@@ -96,7 +96,7 @@ Only test assets you own or are explicitly authorized to assess. A confirmation 
 
 ## Contributing
 
-See [Architecture](docs/ARCHITECTURE.md), [Roadmap](docs/ROADMAP.md), and [Security Policy](SECURITY.md). Add adapters with fixed argument construction, narrow scope, bounded execution, tests, and clear documentation. Do not pass model-generated shell commands to the operating system.
+See [Architecture](docs/ARCHITECTURE.md), [Roadmap](docs/ROADMAP.md), [Adapter Authoring](docs/ADDING_ADAPTERS.md), and [Security Policy](SECURITY.md). Add adapters with fixed argument construction, narrow scope, bounded execution, tests, and clear documentation. Do not pass model-generated shell commands to the operating system.
 
 ## License
 
