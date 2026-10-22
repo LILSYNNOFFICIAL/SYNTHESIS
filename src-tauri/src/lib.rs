@@ -36,6 +36,7 @@ pub struct MissionPlan {
     pub steps: Vec<String>,
     pub provider: String,
     pub recommended_tool: Option<String>,
+    pub suggested_target: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -106,6 +107,26 @@ fn bound_output(mut text: String) -> String {
         text.push_str("\n[Output truncated at 100 KB]");
     }
     text
+}
+
+fn extract_target(mission: &str) -> Option<String> {
+    for token in mission.split_whitespace() {
+        let token = token.trim_matches(|c: char| matches!(c, ',' | ';' | '(' | ')' | '[' | ']' | '{' | '}' | '"' | '\''));
+        let candidate = token.strip_prefix("https://")
+            .or_else(|| token.strip_prefix("http://"))
+            .unwrap_or(token);
+        let mut host = candidate.split('/').next().unwrap_or("");
+        if let Some((prefix, port)) = host.rsplit_once(':') {
+            if !prefix.contains(':') && !port.is_empty() && port.chars().all(|c| c.is_ascii_digit()) {
+                host = prefix;
+            }
+        }
+        let looks_like_target = host.contains('.') || host.contains(':') || candidate.contains('/');
+        if looks_like_target && validate_target(host).is_ok() {
+            return Some(host.to_string());
+        }
+    }
+    None
 }
 
 fn validate_target(target: &str) -> Result<(), String> {
@@ -266,6 +287,7 @@ async fn plan_mission(mission: String, model: Option<String>) -> Result<MissionP
                                 steps,
                                 provider: format!("Ollama · {selected_model}"),
                                 recommended_tool,
+                                suggested_target: extract_target(prompt),
                             });
                         }
                     }
@@ -311,6 +333,7 @@ async fn plan_mission(mission: String, model: Option<String>) -> Result<MissionP
         ],
         provider: "Offline fallback".into(),
         recommended_tool,
+        suggested_target: extract_target(prompt),
     })
 }
 
@@ -365,6 +388,15 @@ pub fn run() {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn extracts_only_valid_targets_from_mission_text() {
+        assert_eq!(extract_target("Scan 192.168.1.10 for open ports"), Some("192.168.1.10".into()));
+        assert_eq!(extract_target("Check DNS for https://example.org/path"), Some("example.org".into()));
+        assert_eq!(extract_target("Inspect 192.168.1.0/24"), Some("192.168.1.0/24".into()));
+        assert_eq!(extract_target("Please explain what DNS means"), None);
+        assert_eq!(extract_target("Run a scan against 999.999.999.999"), None);
+    }
 
     #[test]
     fn rejects_empty_and_oversized_targets() {
