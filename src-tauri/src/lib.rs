@@ -143,7 +143,7 @@ fn build_command(tool_id: &str, target: &str) -> Result<(&'static str, Vec<Strin
         "host" => ("host", vec![target.into()]),
         "whois" => ("whois", vec![target.into()]),
         "http_headers" => ("curl", vec!["-sS".into(), "-I".into(), "--max-time".into(), "15".into(), "--max-redirs".into(), "3".into(), "--proto".into(), "=https,http".into(), format!("https://{target}")]),
-        "http_status" => ("curl", vec!["-sS".into(), "-o".into(), "/dev/null".into(), "-w".into(), "HTTP status: %{http_code}\\nRemote IP: %{remote_ip}\\nTotal time: %{time_total}s\\n".into(), "--max-time".into(), "15".into(), "--max-redirs".into(), "3".into(), "--proto".into(), "=https,http".into(), format!("https://{target}")]),
+        "http_status" => ("curl", vec!["-sS".into(), "-o".into(), "/dev/null".into(), "-w".into(), "HTTP status: %{http_code}\nRemote IP: %{remote_ip}\nTotal time: %{time_total}s\n".into(), "--max-time".into(), "15".into(), "--max-redirs".into(), "3".into(), "--proto".into(), "=https,http".into(), format!("https://{target}")]),
         _ => return Err("Unknown tool. Only registered SYNTHESIS adapters can execute.".into()),
     };
     if tool_id != "nmap" && target.contains('/') {
@@ -274,9 +274,9 @@ async fn run_tool(tool_id: String, target: String, authorized: bool) -> Result<J
         Ok(Ok(result)) => {
             let stdout = String::from_utf8_lossy(&result.stdout);
             let stderr = String::from_utf8_lossy(&result.stderr);
-            let mut text = format!("Adapter: {tool_id}\\nProgram: {program}\\nArguments: {}", args.iter().map(|arg| if arg.contains(' ') { format!("\"{arg}\"") } else { arg.clone() }).collect::<Vec<_>>().join(" "));
-            if !stdout.trim().is_empty() { text.push_str("\\n\\n"); text.push_str(&stdout); }
-            if !stderr.trim().is_empty() { text.push_str("\\n\\nSTDERR:\\n"); text.push_str(&stderr); }
+            let mut text = format!("Adapter: {tool_id}\nProgram: {program}\nArguments: {}", args.iter().map(|arg| if arg.contains(' ') { format!("\"{arg}\"") } else { arg.clone() }).collect::<Vec<_>>().join(" "));
+            if !stdout.trim().is_empty() { text.push_str("\n\n"); text.push_str(&stdout); }
+            if !stderr.trim().is_empty() { text.push_str("\n\nSTDERR:\n"); text.push_str(&stderr); }
             text.truncate(MAX_OUTPUT_BYTES);
             (text, result.status.success())
         }
