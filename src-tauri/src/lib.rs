@@ -279,7 +279,7 @@ async fn plan_mission(mission: String, model: Option<String>) -> Result<MissionP
                             .take(6)
                             .collect();
                         let recommended_tool = parsed.recommended_tool
-                            .filter(|id| registry().iter().any(|tool| tool.id == *id));
+                            .filter(|id| registry().iter().any(|tool| tool.id == id.as_str()));
                         if !steps.is_empty() {
                             return Ok(MissionPlan {
                                 title: parsed.title.filter(|value| !value.trim().is_empty()).unwrap_or_else(|| "Mission plan".into()),
