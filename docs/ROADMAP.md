@@ -5,7 +5,8 @@
 - [x] Rust + Tauri 2 desktop shell and React/TypeScript UI
 - [x] Professional dashboard, mission planner, tool catalog, activity, settings
 - [x] Local Ollama mission planning with deterministic fallback
-- [x] Local Ollama model discovery and selection
+- [x] Local Ollama model discovery, selection, and allowlisted GUI downloads
+- [x] Structured AI plans with validated adapter recommendations and target extraction
 - [x] Eleven fixed adapters: Nmap, ping, traceroute, dig, MX/TXT/NS records, host, WHOIS, HTTP headers, HTTP status
 - [x] Target validation, authorization acknowledgement, direct argument arrays, bounded CIDR scan size
 - [x] Managed child-process timeout and output cap
